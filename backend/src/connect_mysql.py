@@ -9,15 +9,15 @@ class DonorInfo(db.Model):
     # 创建数据表模板
     __tablename__ = 'DonorInfo'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    name = db.Column(db.String)  # 名字
-    age = db.Column(db.String)  # 年龄
-    gender = db.Column(db.String)  # 性别
-    id_num = db.Column(db.String)  # 身份证号码
-    sample_type = db.Column(db.String)  # 采样类型
-    sample_quantity = db.Column(db.String)  # 采样数量
-    date = db.Column(db.String)  # 采样时间
-    place = db.Column(db.String)  # 采样地点
-    phone = db.Column(db.String)  # 联系电话
+    name = db.Column(db.String(128))  # 名字
+    age = db.Column(db.String(128))  # 年龄
+    gender = db.Column(db.String(128))  # 性别
+    id_num = db.Column(db.String(128))  # 身份证号码
+    sample_type = db.Column(db.String(128))  # 采样类型
+    sample_quantity = db.Column(db.String(128))  # 采样数量
+    date = db.Column(db.String(128))  # 采样时间
+    place = db.Column(db.String(128))  # 采样地点
+    phone = db.Column(db.String(128))  # 联系电话
     serial = db.Column(db.Integer)  # 流水号
     available = db.Column(db.Boolean)  # 是否为可用数据
 
@@ -36,6 +36,21 @@ class DonorInfo(db.Model):
 
 
 def add(name, age, gender, id_num, sample_type, sample_quantity, date, place, phone, serial, available):
+    """
+    给数据库加入数据
+    :param name: 名字
+    :param age: 年龄
+    :param gender: 性别
+    :param id_num: 身份证号码
+    :param sample_type: 采样类型
+    :param sample_quantity: 采样数量
+    :param date: 采样时间
+    :param place: 采样地点
+    :param phone: 联系电话
+    :param serial: 流水号
+    :param available: 是否为可用数据
+    :return: str,提示写入是否完成
+    """
     try:
         db.session.add(DonorInfo(
             name=name,
@@ -53,5 +68,26 @@ def add(name, age, gender, id_num, sample_type, sample_quantity, date, place, ph
         db.session.commit()
 
     except SQLAlchemyError:
-        return
+        return "写入失败"
     return "写入完成"
+
+
+def query(keyword: str, con: str):
+    """
+    动态地查询数据库信息
+    :param keyword: 需查询地项目
+    :param con: 查询地条件(精确)
+    :return: 符合条件地数据库对象
+    """
+    filters = {keyword: con}
+    res = db.session.execute(db.select(DonorInfo).filter_by(**filters)).scalars()
+    return res
+
+
+def query_all():
+    """
+    返回所有对象
+    :return: 一个包含了所有对象的列表
+    """
+    res = db.session.execute(db.select(DonorInfo).order_by(DonorInfo.name)).scalars()
+    return res
