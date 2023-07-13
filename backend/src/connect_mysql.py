@@ -94,8 +94,12 @@ def query_all():
     返回所有对象
     :return: 一个包含了所有对象的列表
     """
-    res = db.session.execute(db.select(DonorInfo).order_by(DonorInfo.name)).scalars()
+    res = db.session.execute(db.select(DonorInfo).order_by(DonorInfo.serial)).scalars()
     return res
+
+
+def query_paginate():
+    res = db.session.paginate(db.select(DonorInfo).order_by(DonorInfo.serial))
 
 
 def query_today_num():

@@ -73,6 +73,19 @@ def donor_to_json(di: DonorInfo):
 def add_info():
     serial_num = query_today_num() + 1
 
+    def choose_sample_code(sample: str):
+        """
+        根据传入的样品类型自动选择流水号的代号
+        :param sample: str, 样品类型
+        :return: str,
+        """
+        if sample == "骨髓":
+            return "B"
+        elif sample == "脐带":
+            return "U"
+        else:
+            raise
+
     name = request.json.get('name')
     age = request.json.get('age')
     gender = request.json.get('gender')
@@ -83,7 +96,7 @@ def add_info():
     place = request.json.get('place')
     phone = request.json.get('phone')
     # 根据录入日期和当天第几个生成流水号
-    serial = f'B{datetime.today().strftime("%Y%m%d")}{str(serial_num).rjust(3, "0")}'
+    serial = f'{choose_sample_code(sample_type)}{datetime.today().strftime("%Y%m%d")}{str(serial_num).rjust(3, "0")}'
     available = request.json.get('available')
 
     res = add(name, age, gender, id_num, sample_type, sample_quantity, date, place, phone, serial, available)
