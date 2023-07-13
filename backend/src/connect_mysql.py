@@ -1,3 +1,5 @@
+import datetime
+
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -10,16 +12,18 @@ class DonorInfo(db.Model):
     __tablename__ = 'DonorInfo'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(128))  # 名字
-    age = db.Column(db.String(128))  # 年龄
+    age = db.Column(db.Integer)  # 年龄
     gender = db.Column(db.String(128))  # 性别
     id_num = db.Column(db.String(128))  # 身份证号码
     sample_type = db.Column(db.String(128))  # 采样类型
     sample_quantity = db.Column(db.String(128))  # 采样数量
-    date = db.Column(db.String(128))  # 采样时间
+    date = db.Column(db.DateTime)  # 采样时间
     place = db.Column(db.String(128))  # 采样地点
     phone = db.Column(db.String(128))  # 联系电话
-    serial = db.Column(db.Integer)  # 流水号
+    serial = db.Column(db.String(128))  # 每日流水号
     available = db.Column(db.Boolean)  # 是否为可用数据
+    create_time = db.Column(db.DateTime, default=datetime.datetime.now)  # 创建时间
+    update_time = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 
     def __repr__(self):
         return f'Donor(name{self.name}, ' \
@@ -66,9 +70,10 @@ def add(name, age, gender, id_num, sample_type, sample_quantity, date, place, ph
             available=available
         ))
         db.session.commit()
-
-    except SQLAlchemyError:
-        return "写入失败"
+    except:
+        raise
+    # except SQLAlchemyError:
+    #     return "写入失败"
     return "写入完成"
 
 
@@ -91,3 +96,18 @@ def query_all():
     """
     res = db.session.execute(db.select(DonorInfo).order_by(DonorInfo.name)).scalars()
     return res
+
+
+def query_today_num():
+    """
+    获取今日的数据条目数量
+    """
+    time_now = datetime.datetime.today()
+    # 筛选出当天的录入信息
+    res = db.session.execute(db.select(DonorInfo).filter(db.cast(DonorInfo.create_time, db.DATE) ==
+                                                         db.cast(datetime.datetime.now(), db.DATE))).scalars()
+    # 没有len方法，手动获取录入信息的数量
+    num = 0
+    for i in res:
+        num += 1
+    return num
