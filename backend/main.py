@@ -69,6 +69,20 @@ def donor_to_json(di: DonorInfo):
     return dumps(res, ensure_ascii=False, cls=ComlexEncoder)
 
 
+def get_sample_code(sample_type: str):
+    """
+    根据传入的样品类型返回对应样品代码
+    """
+    sample_code = {
+        "骨髓": "BM",
+        "外周血": "PB",
+        "脐带血": "CB",
+        "脐带": "UC",
+        "其他组织样本": "X"
+    }
+    return sample_code[sample_type]
+
+
 @app.route("/add", methods=['POST'])
 def add_info():
     serial_num = query_today_num() + 1
@@ -83,7 +97,7 @@ def add_info():
     place = request.json.get('place')
     phone = request.json.get('phone')
     # 根据录入日期和当天第几个生成流水号
-    serial = f'B{datetime.today().strftime("%Y%m%d")}{str(serial_num).rjust(3, "0")}'
+    serial = f'{datetime.today().strftime("%Y%m%d")}_{get_sample_code(sample_type)}_{str(serial_num).rjust(3, "0")}'
     available = request.json.get('available')
 
     res = add(name, age, gender, id_num, sample_type, sample_quantity, date, place, phone, serial, available)
