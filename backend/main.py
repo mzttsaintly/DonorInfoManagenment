@@ -102,7 +102,7 @@ def add_info():
 
     res = add(name, age, gender, id_num, sample_type, sample_quantity, date, place, phone, serial, available)
     # logger.debug("写入成功")
-    return res
+    return res + "  流水号为:" + serial
 
 
 @app.route("/quest_all", methods=['POST'])

@@ -70,8 +70,8 @@ def add(name, age, gender, id_num, sample_type, sample_quantity, date, place, ph
             available=available
         ))
         db.session.commit()
-    except:
-        raise
+    except SQLAlchemyError:
+        return "发生错误，请检查数据格式是否正确"
     # except SQLAlchemyError:
     #     return "写入失败"
     return "写入完成"
