@@ -4,7 +4,7 @@ import json
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from loguru import logger
-from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num
+from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num, query_paginate
 from json import dumps
 from datetime import date, datetime
 
@@ -85,6 +85,9 @@ def get_sample_code(sample_type: str):
 
 @app.route("/add", methods=['POST'])
 def add_info():
+    """
+    添加信息进入数据库
+    """
     serial_num = query_today_num() + 1
 
     name = request.json.get('name')
@@ -96,7 +99,7 @@ def add_info():
     date = request.json.get('date')
     place = request.json.get('place')
     phone = request.json.get('phone')
-    # 根据录入日期和当天第几个生成流水号
+    # 根据录入日期和当天第几个数据生成流水号
     serial = f'{datetime.today().strftime("%Y%m%d")}_{get_sample_code(sample_type)}_{str(serial_num).rjust(3, "0")}'
     available = request.json.get('available')
 
@@ -107,6 +110,9 @@ def add_info():
 
 @app.route("/quest_all", methods=['POST'])
 def quest_all():
+    """
+    获取全部条目
+    """
     res = query_all()
     res_list = []
     for di in res:
@@ -129,6 +135,54 @@ def quest_all():
     return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
 
 
-@app.route("/quest_num", methods=['POST'])
-def quest_num():
-    return query_today_num()
+# @app.route("/quest_num", methods=['POST'])
+# def quest_num():
+#     return query_today_num()
+
+
+@app.route("/paginate_query", methods=['POST'])
+def paginate_query():
+    pn = query_paginate()
+    res_list = []
+    for di in pn.items:
+        res_list.append({
+            "name": di.name,
+            "age": di.age,
+            "gender": di.gender,
+            "id_num": di.id_num,
+            "sample_type": di.sample_type,
+            "sample_quantity": di.sample_quantity,
+            "date": di.date,
+            "place": di.place,
+            "phone": di.phone,
+            "serial": di.serial,
+            "available": di.available,
+            "create_time": di.create_time,
+            "update_time": di.update_time
+        })
+    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
+
+
+@app.route("/query_by_param", methods=['POST'])
+def query_by_param():
+    keyword = request.json.get('keyword')
+    con = request.json.get('con')
+    res = query(keyword, con)
+    res_list = []
+    for di in res:
+        res_list.append({
+            "name": di.name,
+            "age": di.age,
+            "gender": di.gender,
+            "id_num": di.id_num,
+            "sample_type": di.sample_type,
+            "sample_quantity": di.sample_quantity,
+            "date": di.date,
+            "place": di.place,
+            "phone": di.phone,
+            "serial": di.serial,
+            "available": di.available,
+            "create_time": di.create_time,
+            "update_time": di.update_time
+        })
+    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
