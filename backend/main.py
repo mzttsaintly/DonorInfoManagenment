@@ -58,7 +58,7 @@ def donor_to_json(di: DonorInfo):
         "id_num": di.id_num,
         "sample_type": di.sample_type,
         "sample_quantity": di.sample_quantity,
-        "date": di.date,
+        "date": di.date.strftime("%Y-%m-%d"),
         "place": di.place,
         "phone": di.phone,
         "serial": di.serial,
@@ -78,7 +78,7 @@ def get_sample_code(sample_type: str):
         "外周血": "PB",
         "脐带血": "CB",
         "脐带": "UC",
-        "其他组织样本": "X"
+        "其他组织样品": "X"
     }
     return sample_code[sample_type]
 
@@ -101,7 +101,7 @@ def add_info():
     phone = request.json.get('phone')
     # 根据录入日期和当天第几个数据生成流水号
     serial = f'{datetime.today().strftime("%Y%m%d")}_{get_sample_code(sample_type)}_{str(serial_num).rjust(3, "0")}'
-    available = request.json.get('available')
+    available = True
 
     res = add(name, age, gender, id_num, sample_type, sample_quantity, date, place, phone, serial, available)
     # logger.debug("写入成功")
@@ -123,7 +123,7 @@ def quest_all():
             "id_num": di.id_num,
             "sample_type": di.sample_type,
             "sample_quantity": di.sample_quantity,
-            "date": di.date,
+            "date": di.date.strftime("%Y-%m-%d"),
             "place": di.place,
             "phone": di.phone,
             "serial": di.serial,
@@ -152,7 +152,7 @@ def paginate_query():
             "id_num": di.id_num,
             "sample_type": di.sample_type,
             "sample_quantity": di.sample_quantity,
-            "date": di.date,
+            "date": di.date.strftime("%Y-%m-%d"),
             "place": di.place,
             "phone": di.phone,
             "serial": di.serial,
@@ -177,7 +177,7 @@ def query_by_param():
             "id_num": di.id_num,
             "sample_type": di.sample_type,
             "sample_quantity": di.sample_quantity,
-            "date": di.date,
+            "date": di.date.strftime("%Y-%m-%d"),
             "place": di.place,
             "phone": di.phone,
             "serial": di.serial,

@@ -104,6 +104,10 @@ def query_paginate():
     return res
 
 
+def query_date(keword: str, con: str):
+    pass
+
+
 def query_today_num():
     """
     获取今日的数据条目数量
