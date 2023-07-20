@@ -104,8 +104,41 @@ def query_paginate():
     return res
 
 
-def query_date(keword: str, con: str):
-    pass
+def choose_attr(attr_name: str):
+    """根据传入字符串返回DonorInfo类中的属性"""
+    attr_dict = {
+        'name': DonorInfo.name,
+        'age': DonorInfo.age,
+        'gender': DonorInfo.gender,
+        'id_num': DonorInfo.id_num,
+        'sample_type': DonorInfo.sample_type,
+        'sample_quantity': DonorInfo.sample_quantity,
+        'date': DonorInfo.date,
+        'place': DonorInfo.place,
+        'phone': DonorInfo.phone,
+        'serial': DonorInfo.serial,
+        'available': DonorInfo.available,
+        'create_time': DonorInfo.create_time,
+        'update_time': DonorInfo.update_time
+    }
+    return attr_dict[attr_name]
+
+
+def fuzzy_query(attr_name: str, con: str):
+    """模糊查询"""
+    res_list = DonorInfo.query.filter(choose_attr(attr_name).ilike(f'%{con}%')).all()
+    return res_list
+
+
+def query_date(start: str, end: str):
+    """
+    根据时间段返回结果
+    """
+    starttime = start + '' + '0:0:0'
+    endtime = end + '' + '23:59:59'
+    record_list = DonorInfo.query.filter(DonorInfo.date >= starttime).filter(DonorInfo.date <= endtime) \
+        .order_by(DonorInfo.date.desc()).all()
+    return record_list
 
 
 def query_today_num():

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
+from datetime import date, datetime
+from json import dumps
 
 from flask import Flask, request
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from loguru import logger
-from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num, query_paginate
-from json import dumps
-from datetime import date, datetime
+
+from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num, query_paginate, query_date, fuzzy_query
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -51,6 +52,9 @@ with app.app_context():
 
 
 def donor_to_json(di: DonorInfo):
+    """
+    单个信息转换为json
+    """
     res = {
         "name": di.name,
         "age": di.age,
@@ -67,6 +71,28 @@ def donor_to_json(di: DonorInfo):
         "update_time": di.update_time
     }
     return dumps(res, ensure_ascii=False, cls=ComlexEncoder)
+
+
+def donors_to_json(dis):
+    res_list = []
+    for di in dis:
+        res_list.append({
+            "name": di.name,
+            "age": di.age,
+            "gender": di.gender,
+            "id_num": di.id_num,
+            "sample_type": di.sample_type,
+            "sample_quantity": di.sample_quantity,
+            "date": di.date.strftime("%Y-%m-%d"),
+            "place": di.place,
+            "phone": di.phone,
+            "serial": di.serial,
+            "available": di.available,
+            "create_time": di.create_time,
+            "update_time": di.update_time
+        })
+        logger.debug(res_list)
+    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
 
 
 def get_sample_code(sample_type: str):
@@ -114,25 +140,26 @@ def quest_all():
     获取全部条目
     """
     res = query_all()
-    res_list = []
-    for di in res:
-        res_list.append({
-            "name": di.name,
-            "age": di.age,
-            "gender": di.gender,
-            "id_num": di.id_num,
-            "sample_type": di.sample_type,
-            "sample_quantity": di.sample_quantity,
-            "date": di.date.strftime("%Y-%m-%d"),
-            "place": di.place,
-            "phone": di.phone,
-            "serial": di.serial,
-            "available": di.available,
-            "create_time": di.create_time,
-            "update_time": di.update_time
-        })
-        logger.debug(res_list)
-    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
+    # res_list = []
+    # for di in res:
+    #     res_list.append({
+    #         "name": di.name,
+    #         "age": di.age,
+    #         "gender": di.gender,
+    #         "id_num": di.id_num,
+    #         "sample_type": di.sample_type,
+    #         "sample_quantity": di.sample_quantity,
+    #         "date": di.date.strftime("%Y-%m-%d"),
+    #         "place": di.place,
+    #         "phone": di.phone,
+    #         "serial": di.serial,
+    #         "available": di.available,
+    #         "create_time": di.create_time,
+    #         "update_time": di.update_time
+    #     })
+    #     logger.debug(res_list)
+    # return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
+    return donors_to_json(res)
 
 
 # @app.route("/quest_num", methods=['POST'])
@@ -143,24 +170,8 @@ def quest_all():
 @app.route("/paginate_query", methods=['POST'])
 def paginate_query():
     pn = query_paginate()
-    res_list = []
-    for di in pn.items:
-        res_list.append({
-            "name": di.name,
-            "age": di.age,
-            "gender": di.gender,
-            "id_num": di.id_num,
-            "sample_type": di.sample_type,
-            "sample_quantity": di.sample_quantity,
-            "date": di.date.strftime("%Y-%m-%d"),
-            "place": di.place,
-            "phone": di.phone,
-            "serial": di.serial,
-            "available": di.available,
-            "create_time": di.create_time,
-            "update_time": di.update_time
-        })
-    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
+
+    return donors_to_json(pn)
 
 
 @app.route("/query_by_param", methods=['POST'])
@@ -168,21 +179,26 @@ def query_by_param():
     keyword = request.json.get('keyword')
     con = request.json.get('con')
     res = query(keyword, con)
-    res_list = []
-    for di in res:
-        res_list.append({
-            "name": di.name,
-            "age": di.age,
-            "gender": di.gender,
-            "id_num": di.id_num,
-            "sample_type": di.sample_type,
-            "sample_quantity": di.sample_quantity,
-            "date": di.date.strftime("%Y-%m-%d"),
-            "place": di.place,
-            "phone": di.phone,
-            "serial": di.serial,
-            "available": di.available,
-            "create_time": di.create_time,
-            "update_time": di.update_time
-        })
-    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
+    return donors_to_json(res)
+
+
+@app.route("/query_datas", methods=['POST'])
+def query_datas():
+    """
+    根据起始时间和结束时间搜索
+    """
+    start_time = request.json.get('start-time')
+    end_time = request.json.get('end-time')
+    res = query_date(start_time, end_time)
+    return donors_to_json(res)
+
+
+@app.route("/fuzzy_query", methods=['POST'])
+def fuzzy_query_from():
+    """
+    模糊查询
+    """
+    attr_name = request.json.get('attr_name')
+    con = request.json.get('con')
+    res = fuzzy_query(attr_name, con)
+    return donors_to_json(res)
