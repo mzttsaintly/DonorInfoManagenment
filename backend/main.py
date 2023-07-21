@@ -187,8 +187,8 @@ def query_datas():
     """
     根据起始时间和结束时间搜索
     """
-    start_time = request.json.get('start-time')
-    end_time = request.json.get('end-time')
+    start_time = request.json.get('start_time')
+    end_time = request.json.get('end_time')
     res = query_date(start_time, end_time)
     return donors_to_json(res)
 

@@ -134,8 +134,8 @@ def query_date(start: str, end: str):
     """
     根据时间段返回结果
     """
-    starttime = start + '' + '0:0:0'
-    endtime = end + '' + '23:59:59'
+    starttime = start + ' ' + '0:0:0'
+    endtime = end + ' ' + '23:59:59'
     record_list = DonorInfo.query.filter(DonorInfo.date >= starttime).filter(DonorInfo.date <= endtime) \
         .order_by(DonorInfo.date.desc()).all()
     return record_list
