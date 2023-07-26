@@ -7,7 +7,8 @@ from flask import Flask, request
 from flask_cors import CORS
 from loguru import logger
 
-from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num, query_paginate, query_date, fuzzy_query
+from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num, query_paginate, query_date, \
+    fuzzy_query
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -130,8 +131,22 @@ def add_info():
     available = True
 
     res = add(name, age, gender, id_num, sample_type, sample_quantity, date, place, phone, serial, available)
+
+    res_info = {
+        "name": name,
+        "age": age,
+        "gender": gender,
+        "id_num": id_num,
+        "sample_type": sample_type,
+        "sample_quantity": sample_quantity,
+        "date": date,
+        "place": place,
+        "phone": phone,
+        "serial": serial,
+        "res": res
+    }
     # logger.debug("写入成功")
-    return res + "  流水号为:" + serial
+    return res_info
 
 
 @app.route("/quest_all", methods=['POST'])
@@ -169,9 +184,14 @@ def quest_all():
 
 @app.route("/paginate_query", methods=['POST'])
 def paginate_query():
-    pn = query_paginate()
-
-    return donors_to_json(pn)
+    page = request.json.get('currentPage')
+    pn = query_paginate(page=page)
+    pages = pn.page()
+    res = donors_to_json(pn.item())
+    return {
+        "currentPage": pages,
+        "res": res
+    }
 
 
 @app.route("/query_by_param", methods=['POST'])

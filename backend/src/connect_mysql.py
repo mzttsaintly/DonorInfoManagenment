@@ -99,8 +99,8 @@ def query_all():
     return res
 
 
-def query_paginate():
-    res = DonorInfo.query.paginate()
+def query_paginate(page=1, per_page=10):
+    res = DonorInfo.query.paginate(page=page, per_page=per_page)
     return res
 
 
