@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import getpass
 import json
 from datetime import date, datetime
 from json import dumps
@@ -10,6 +11,10 @@ from loguru import logger
 from src.connect_mysql import db, DonorInfo, add, query, query_all, query_today_num, query_paginate, query_date, \
     fuzzy_query
 
+user = input("请输入用户名：")
+# password = input("请输入密码：")
+password = getpass.getpass("请输入密码：")
+
 app = Flask(__name__)
 cors = CORS(app)
 
@@ -17,8 +22,8 @@ cors = CORS(app)
 class Config(object):
     """配置数据库参数"""
     # 设置连接数据库地URL
-    user = 'root'
-    password = '0629'
+    # user = 'root'
+    # password = '0629'
     database = 'test_db'
 
     app.config["JSON_AS_ASCII"] = False
@@ -155,25 +160,6 @@ def quest_all():
     获取全部条目
     """
     res = query_all()
-    # res_list = []
-    # for di in res:
-    #     res_list.append({
-    #         "name": di.name,
-    #         "age": di.age,
-    #         "gender": di.gender,
-    #         "id_num": di.id_num,
-    #         "sample_type": di.sample_type,
-    #         "sample_quantity": di.sample_quantity,
-    #         "date": di.date.strftime("%Y-%m-%d"),
-    #         "place": di.place,
-    #         "phone": di.phone,
-    #         "serial": di.serial,
-    #         "available": di.available,
-    #         "create_time": di.create_time,
-    #         "update_time": di.update_time
-    #     })
-    #     logger.debug(res_list)
-    # return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
     return donors_to_json(res)
 
 
@@ -186,12 +172,16 @@ def quest_all():
 def paginate_query():
     page = request.json.get('currentPage')
     pn = query_paginate(page=page)
-    pages = pn.page()
-    res = donors_to_json(pn.item())
-    return {
+    pages = pn.page
+    total_pages = pn.pages
+    res = donors_to_json(pn.items)
+    res_list = {
         "currentPage": pages,
+        "total": total_pages,
         "res": res
     }
+    # return res
+    return dumps(res_list, ensure_ascii=False, cls=ComlexEncoder)
 
 
 @app.route("/query_by_param", methods=['POST'])
