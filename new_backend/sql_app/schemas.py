@@ -16,6 +16,7 @@ class DonorInfoBase(BaseModel):
 
 
 class UserBase(BaseModel):
+    id: int | None = None
     user_name: str
     authority: int
 

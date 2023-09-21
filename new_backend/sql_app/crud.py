@@ -90,7 +90,7 @@ def fuzzy_query_donorInfo(db: Session, attr_name: str, con: str):
 def query_date(db: Session, start: str, end: str):
     starttime = start + ' ' + '0:0:0'
     endtime = end + ' ' + '23:59:59'
-    return db.query(models.DonorInfo).filter(models.DonorInfo.date >= starttime)\
+    return db.query(models.DonorInfo).filter(models.DonorInfo.date >= starttime) \
         .filter(models.DonorInfo.date <= endtime).order_by(models.DonorInfo.date.desc()).all()
 
 
@@ -100,3 +100,13 @@ def query_today_num(db: Session, today: str):
     for i in res:
         num += 1
     return num
+
+
+def get_all_user(db: Session):
+    return db.query(models.User).all()
+
+
+def change_user_authority(db: Session, user_id: int, authority: int):
+    user = db.query(models.User).filter(models.User.id == user_id).update({'authority': authority})
+    db.commit()
+    return user
