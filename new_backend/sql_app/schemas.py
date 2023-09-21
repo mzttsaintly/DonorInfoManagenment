@@ -13,8 +13,6 @@ class DonorInfoBase(BaseModel):
     date: str
     place: str
     phone: str
-    serial: str
-    available: str
 
 
 class UserBase(BaseModel):
@@ -29,3 +27,13 @@ class Token(BaseModel):
 
 class TokenData(BaseModel):
     username: Union[str, None] = None
+
+
+class QueryDateBase(BaseModel):
+    start_time: str
+    end_time: str
+
+
+class FuzzyKeywordBase(BaseModel):
+    keyword: str
+    con: str
