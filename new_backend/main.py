@@ -189,7 +189,11 @@ async def get_all_user(db: Session = Depends(get_db),
     logger.info('用户名为' + str(current_user.user_name))
     logger.info('用户权限为' + str(current_user.authority))
     if current_user.authority >= 4:
-        return crud.get_all_user(db)
+        res = crud.get_all_user(db)
+        res_list = []
+        for i in res:
+            res_list.append({"id": i.id, "user_name": i.user_name, "authority": i.authority})
+        return res_list
     else:
         return "权限不足"
 
